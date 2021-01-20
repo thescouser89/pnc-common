@@ -12,6 +12,20 @@ import java.util.Map;
 public class Strings {
 
     /**
+     * Check if the given string is null or contains only whitespace characters.
+     *
+     * @param string String to check for non-whitespace characters
+     * @return boolean True if the string is null, empty, or contains only whitespace (empty when trimmed). Otherwise
+     *         return false.
+     */
+    public static boolean isEmpty(String string) {
+        if (string == null) {
+            return true;
+        }
+        return string.trim().isEmpty();
+    }
+
+    /**
      * Converts string with key:value1|value2,key2:value22 to a map where key is an entry key and values are a list of
      * items.
      */
@@ -33,5 +47,53 @@ public class Strings {
             throw new RuntimeException("Invalid key:value string: [" + string + "]", e);
         }
         return map;
+    }
+
+    /**
+     * Remove ending slash if present and return the string without ending slash
+     *
+     * @param string
+     * @return
+     */
+    public static String stripEndingSlash(String string) {
+        if (string == null) {
+            return null;
+        }
+        if (string.endsWith("/")) {
+            string = string.substring(0, string.length() - 1);
+        }
+        return string;
+    }
+
+    /**
+     * Remove slash at the begining if present and return the string without ending slash
+     *
+     * @param string
+     * @return
+     */
+    public static String stripTrailingSlash(String string) {
+        if (string == null) {
+            return null;
+        }
+        if (string.startsWith("/")) {
+            string = string.substring(1);
+        }
+        return string;
+    }
+
+    /**
+     * Adds ending slash if it is not present.
+     *
+     * @param string
+     * @return
+     */
+    public static String addEndingSlash(String string) {
+        if (string == null) {
+            return null;
+        }
+        if (!string.endsWith("/")) {
+            string += "/";
+        }
+        return string;
     }
 }
