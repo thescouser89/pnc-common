@@ -39,6 +39,7 @@ public class NumbersTest {
         convertDecimalToBase32AndBack(Long.MIN_VALUE);
         convertDecimalToBase32AndBack(0L);
         convertDecimalToBase32AndBack(0xffffffffffffffffL);
+        convertDecimalToBase32AndBack(-2975281302211218003L);
     }
 
     public void convertDecimalToBase32AndBack(long decimal) {
