@@ -31,6 +31,24 @@ public class NumbersTest {
     }
 
     @Test
+    public void convertDecimalToBase32AndBack() {
+        long l = 1234567890123456789L;
+        convertDecimalToBase32AndBack(1234567890123456789L);
+        convertDecimalToBase32AndBack(4242L);
+        convertDecimalToBase32AndBack(Long.MAX_VALUE);
+        convertDecimalToBase32AndBack(Long.MIN_VALUE);
+        convertDecimalToBase32AndBack(0L);
+        convertDecimalToBase32AndBack(0xffffffffffffffffL);
+    }
+
+    public void convertDecimalToBase32AndBack(long decimal) {
+        String base32 = Numbers.decimalToBase32(decimal);
+        System.out.println(base32);
+        long backToDecimal = Numbers.base32ToDecimal(base32);
+        Assertions.assertEquals(decimal, backToDecimal);
+    }
+
+    @Test
     public void convertDecimalToBase64() {
         long decimal = 4242L;
         String base64 = Numbers.decimalToBase64(decimal);

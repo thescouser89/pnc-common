@@ -21,10 +21,13 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.Base64;
 
+import org.apache.commons.codec.binary.Base32;
+
 public class Numbers {
 
     private static Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
     private static Base64.Decoder decoder = Base64.getUrlDecoder();
+    private static Base32 base32 = new Base32();
 
     public static byte[] longToBytes(long l) {
         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
@@ -47,6 +50,13 @@ public class Numbers {
     }
 
     /**
+     * Convert long to base32
+     */
+    public static String decimalToBase32(long l) {
+        return base32.encodeToString(longToBytes(l)).substring(0,13);
+    }
+
+    /**
      * Convert numeral base64 to long
      */
     public static Long base64ToDecimal(String numeralBase64) {
@@ -54,6 +64,16 @@ public class Numbers {
             return null;
         }
         return bytesToLong(decoder.decode(numeralBase64));
+    }
+
+    /**
+     * Convert numeral base32 to long
+     */
+    public static Long base32ToDecimal(String numeralBase32) {
+        if (Strings.isEmpty(numeralBase32)) {
+            return null;
+        }
+        return bytesToLong(base32.decode(numeralBase32));
     }
 
 }
