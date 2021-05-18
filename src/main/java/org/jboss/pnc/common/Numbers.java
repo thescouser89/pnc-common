@@ -53,7 +53,7 @@ public class Numbers {
      * Convert long to base32
      */
     public static String decimalToBase32(long l) {
-        return base32.encodeToString(longToBytes(l)).substring(0,13);
+        return base32.encodeToString(longToBytes(l)).substring(0, 13);
     }
 
     /**
