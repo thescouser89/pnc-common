@@ -20,11 +20,14 @@ package org.jboss.pnc.common;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.Base64;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base32;
 
 public class Numbers {
 
+    public static final String BASE32_PATTERN_STRING = "[A-Z2-7]+";
+    private static final Pattern BASE32_PATTERN = Pattern.compile(BASE32_PATTERN_STRING);
     private static Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
     private static Base64.Decoder decoder = Base64.getUrlDecoder();
     private static Base32 base32 = new Base32();
@@ -72,6 +75,12 @@ public class Numbers {
     public static Long base32ToDecimal(String numeralBase32) {
         if (Strings.isEmpty(numeralBase32)) {
             return null;
+        }
+        if (numeralBase32.length() != 13) {
+            throw new IllegalArgumentException("Long base32 encoding needs exactly 13 digits.");
+        }
+        if (!BASE32_PATTERN.matcher(numeralBase32).matches()) {
+            throw new IllegalArgumentException("Long base32 encoding needs to match '" + BASE32_PATTERN_STRING + "'.");
         }
         return bytesToLong(base32.decode(numeralBase32));
     }
