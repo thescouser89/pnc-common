@@ -20,6 +20,8 @@ package org.jboss.pnc.common;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class NumbersTest {
 
     @Test
@@ -47,6 +49,31 @@ public class NumbersTest {
         System.out.println(base32);
         long backToDecimal = Numbers.base32ToDecimal(base32);
         Assertions.assertEquals(decimal, backToDecimal);
+    }
+
+    @Test
+    public void failToConvertBase32Nonsense() {
+        Numbers.base32ToDecimal("AAAAAAAAAAAAA");
+        try {
+            Numbers.base32ToDecimal("AAAAAAAAAAAA");
+            fail("Should fail when wrong number of digits is used");
+        } catch (IllegalArgumentException ex) {
+        }
+        try {
+            Numbers.base32ToDecimal("AAAAAAAAAAAAAA");
+            fail("Should fail when wrong number of digits is used");
+        } catch (IllegalArgumentException ex) {
+        }
+        try {
+            Numbers.base32ToDecimal("This is Nonsense01#");
+            fail("Should fail when nonsense used");
+        } catch (IllegalArgumentException ex) {
+        }
+        try {
+            Long aaa = Numbers.base32ToDecimal("aAAAAAAAAAAAA");
+            fail("Should fail when wrong digits are used " + aaa);
+        } catch (IllegalArgumentException ex) {
+        }
     }
 
     @Test
