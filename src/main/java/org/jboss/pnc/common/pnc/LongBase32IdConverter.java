@@ -20,12 +20,13 @@ package org.jboss.pnc.common.pnc;
 import org.jboss.pnc.common.Numbers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.Serializable;
 
 /**
  * Converts ids from long to base32 strings and vice versa, while keeping backward compatibility with decimal ids up to
  * {@value OLD_ID_BOUNDARY}.
  */
-public class LongBase32IdConverter {
+public class LongBase32IdConverter implements Serializable {
 
     private static final Logger logger = LoggerFactory.getLogger(LongBase32IdConverter.class);
     /**
