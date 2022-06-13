@@ -96,4 +96,19 @@ public class Strings {
         }
         return string;
     }
+
+    /**
+     * If the value is not empty the value is returned otherwise the defaultValue is returned.
+     *
+     * @param value
+     * @param defaultValue
+     * @return
+     */
+    public static String valueOrDefault(String value, String defaultValue) {
+        if (!isEmpty(value)) {
+            return value;
+        } else {
+            return defaultValue;
+        }
+    }
 }
