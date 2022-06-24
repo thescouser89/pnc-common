@@ -31,9 +31,11 @@ public class LongBase32IdConverter {
     /**
      * For backward compatibility to support old urls. GUID are always bigger than this number. We need also to avoid
      * confusing "number-like" base32 encodings with true numbers, the lowest "number-like" base32 encoded long is
-     * "2222222222222".
+     * "2222222222222" and the highest "number-like" base32 encoded long is "9999999999999".
      */
     public static final long OLD_ID_BOUNDARY = 2222222222222L;
+    public static final long HIGHEST_BASE32_NUMBER_LIKE = 9999999999999L; // more than 13 chars, it must be a long value
+                                                                          // already
 
     public static Long toLong(String id) {
         if (id == null) {
@@ -41,9 +43,13 @@ public class LongBase32IdConverter {
         }
         if (id.matches("[0-9]+")) {
             try {
-                long possibleOldId = Long.parseLong(id);
-                if (possibleOldId < OLD_ID_BOUNDARY) {
-                    return possibleOldId;
+                Long possibleId = Long.parseLong(id);
+                if (possibleId < OLD_ID_BOUNDARY) {
+                    return possibleId;
+                } else {
+                    if (possibleId > HIGHEST_BASE32_NUMBER_LIKE) {
+                        return possibleId;
+                    }
                 }
             } catch (NumberFormatException e) {
                 // not a long number

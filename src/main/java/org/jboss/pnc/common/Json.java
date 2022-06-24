@@ -14,7 +14,13 @@ public class Json {
         if (jsonNode.isMissingNode()) {
             return Optional.empty();
         } else {
-            return Optional.of((T) jsonNode.numberValue());
+            if (jsonNode.isNumber()) {
+                return Optional.of((T) jsonNode.numberValue());
+            } else {
+                // number is probably quoted
+                String value = jsonNode.textValue();
+                return Optional.of((T) Long.valueOf(value));
+            }
         }
     }
 
