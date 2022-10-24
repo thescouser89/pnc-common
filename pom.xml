@@ -38,6 +38,20 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <tagSuffix />
     </properties>
+
+    <repositories>
+      <repository>
+        <id>jboss-snapshots</id>
+        <url>https://repository.jboss.org/nexus/content/repositories/snapshots</url>
+        <snapshots>
+          <enabled>true</enabled>
+        </snapshots>
+        <releases>
+          <enabled>false</enabled>
+        </releases>
+      </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
