@@ -20,8 +20,6 @@ package org.jboss.pnc.common.log;
 import org.jboss.pnc.api.constants.MDCHeaderKeys;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.common.concurrent.Sequence;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -57,9 +55,9 @@ public class MDCUtils {
         Map<String, String> mdcContext = new HashMap<>();
 
         for (MDCHeaderKeys key : MDCHeaderKeys.values()) {
-            copyToMap(mdcContext, key, headers);
+            copyFromHeaders(mdcContext, key, headers);
         }
-        copyToMap(mdcContext, MDCHeaderKeys.REQUEST_CONTEXT, headers, () -> Sequence.nextId().toString());
+        copyFromHeaders(mdcContext, MDCHeaderKeys.REQUEST_CONTEXT, headers, () -> Sequence.nextId().toString());
 
         MDC.setContextMap(mdcContext);
     }
@@ -68,12 +66,15 @@ public class MDCUtils {
         Map<String, String> headers = new HashMap<>();
 
         for (MDCHeaderKeys key : MDCHeaderKeys.values()) {
-            copyToMap(headers, key, MDC::get);
+            String value = MDC.get(key.getMdcKey());
+            if (!Strings.isEmpty(value)) {
+                headers.put(key.getHeaderName(), value);
+            }
         }
         return headers;
     }
 
-    private static void copyToMap(
+    private static void copyFromHeaders(
             Map<String, String> map,
             MDCHeaderKeys headerKeys,
             Function<String, String> valueGetter) {
@@ -83,7 +84,7 @@ public class MDCUtils {
         }
     }
 
-    private static void copyToMap(
+    private static void copyFromHeaders(
             Map<String, String> map,
             MDCHeaderKeys headerKeys,
             Function<String, String> valueGetter,
