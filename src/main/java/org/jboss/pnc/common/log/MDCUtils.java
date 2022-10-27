@@ -23,6 +23,7 @@ import org.jboss.pnc.common.concurrent.Sequence;
 import org.slf4j.MDC;
 
 import javax.ws.rs.container.ContainerRequestContext;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -32,11 +33,13 @@ import java.util.function.Supplier;
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
  */
 public class MDCUtils {
-    public static final Map<String, String> HEADER_KEY_MAPPING = new HashMap<>();
+    public static final Map<String, String> HEADER_KEY_MAPPING;
     static {
+        Map<String, String> mapping = new HashMap<>();
         for (MDCHeaderKeys headerKey : MDCHeaderKeys.values()) {
-            HEADER_KEY_MAPPING.put(headerKey.getMdcKey(), headerKey.getHeaderName());
+            mapping.put(headerKey.getMdcKey(), headerKey.getHeaderName());
         }
+        HEADER_KEY_MAPPING = Collections.unmodifiableMap(mapping);
     }
 
     /**
