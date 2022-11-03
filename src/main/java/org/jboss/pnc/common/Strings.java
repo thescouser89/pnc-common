@@ -117,4 +117,17 @@ public class Strings {
         c[0] = Character.toLowerCase(c[0]);
         return new String(c);
     }
+
+    /**
+     *
+     * @return true if 'search' String matches any String in the 'strings' array.
+     */
+    public static boolean anyStringEquals(String search, String... strings) {
+        for (String string : strings) {
+            if (search.equals(string)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
