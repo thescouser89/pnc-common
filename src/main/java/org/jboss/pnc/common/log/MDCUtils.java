@@ -18,8 +18,10 @@
 package org.jboss.pnc.common.log;
 
 import org.jboss.pnc.api.constants.MDCHeaderKeys;
+import org.jboss.pnc.api.constants.MDCKeys;
 import org.jboss.pnc.common.Strings;
 import org.jboss.pnc.common.concurrent.Sequence;
+import org.jboss.pnc.common.otel.OtelUtils;
 import org.slf4j.MDC;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -74,7 +76,26 @@ public class MDCUtils {
                 headers.put(key.getHeaderName(), value);
             }
         }
+
+        headers.putAll(getOtelHeadersFromMDC());
         return headers;
+    }
+
+    public static Map<String, String> getOtelHeadersFromMDC() {
+        String traceId = Strings.isEmpty(MDC.get(MDCKeys.SLF4J_TRACE_ID_KEY)) ? MDC.get(MDCKeys.TRACE_ID_KEY)
+                : MDC.get(MDCKeys.SLF4J_TRACE_ID_KEY);
+        String spanId = Strings.isEmpty(MDC.get(MDCKeys.SLF4J_SPAN_ID_KEY)) ? MDC.get(MDCKeys.SPAN_ID_KEY)
+                : MDC.get(MDCKeys.SLF4J_SPAN_ID_KEY);
+        String traceFlags = Strings.isEmpty(MDC.get(MDCKeys.SLF4J_TRACE_FLAGS_KEY)) ? MDC.get(MDCKeys.TRACE_FLAGS_KEY)
+                : MDC.get(MDCKeys.SLF4J_TRACE_FLAGS_KEY);
+        String traceState = Strings.isEmpty(MDC.get(MDCKeys.SLF4J_TRACE_STATE_KEY)) ? MDC.get(MDCKeys.TRACE_STATE_KEY)
+                : MDC.get(MDCKeys.SLF4J_TRACE_STATE_KEY);
+
+        Map<String, String> otelHeaders = new HashMap<>();
+        otelHeaders.putAll(OtelUtils.createTraceParentHeader(traceId, spanId, traceFlags));
+        otelHeaders.putAll(OtelUtils.createTraceStateHeader(traceState));
+
+        return otelHeaders;
     }
 
     private static void copyFromHeaders(
@@ -99,4 +120,5 @@ public class MDCUtils {
             map.put(headerKeys.getMdcKey(), value);
         }
     }
+
 }
