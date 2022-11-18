@@ -28,15 +28,21 @@ import java.util.stream.Collectors;
 import javax.ws.rs.container.ContainerRequestContext;
 
 import org.jboss.pnc.api.constants.MDCHeaderKeys;
+import org.jboss.pnc.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.redhat.resilience.otel.internal.OtelContextUtil;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.api.trace.TraceStateBuilder;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
 
 public class OtelUtils {
 
@@ -96,7 +102,7 @@ public class OtelUtils {
         }
     }
 
-    public static Map<String, String> createTraceParentHeaderFromSpan(SpanContext spanContext) {
+    public static Map<String, String> createTraceParentHeader(SpanContext spanContext) {
         return Collections.singletonMap(
                 MDCHeaderKeys.TRACEPARENT.getHeaderName(),
                 String.format(
@@ -107,7 +113,23 @@ public class OtelUtils {
                         spanContext.getTraceFlags().asHex()));
     }
 
-    public static Map<String, String> createTraceStateHeaderFromSpan(SpanContext spanContext) {
+    public static Map<String, String> createTraceParentHeader(String traceId, String spanId, String traceFlags) {
+
+        if (Strings.isEmpty(traceId) || Strings.isEmpty(spanId)) {
+            return Collections.emptyMap();
+        }
+
+        return Collections.singletonMap(
+                MDCHeaderKeys.TRACEPARENT.getHeaderName(),
+                String.format(
+                        "%s-%s-%s-%s",
+                        TRACEPARENT_VERSION_00,
+                        traceId,
+                        spanId,
+                        Strings.isEmpty(traceFlags) ? TraceFlags.getDefault().asHex() : traceFlags));
+    }
+
+    public static Map<String, String> createTraceStateHeader(SpanContext spanContext) {
         return Collections.singletonMap(
                 MDCHeaderKeys.TRACESTATE.getHeaderName(),
                 spanContext.getTraceState()
@@ -119,16 +141,30 @@ public class OtelUtils {
 
     }
 
-    public static TraceState createTraceStateFromMembersMap(Map<String, String> members) {
+    public static Map<String, String> createTraceStateHeader(String membersList) {
+        return Collections.singletonMap(
+                MDCHeaderKeys.TRACESTATE.getHeaderName(),
+                Strings.isEmpty(membersList)
+                        ? TraceState.getDefault()
+                                .asMap()
+                                .entrySet()
+                                .stream()
+                                .map(Objects::toString)
+                                .collect(Collectors.joining(","))
+                        : membersList);
+
+    }
+
+    public static TraceState createTraceState(Map<String, String> membersMap) {
         TraceStateBuilder builder = TraceState.builder();
-        members.forEach((key, value) -> {
+        membersMap.forEach((key, value) -> {
             builder.put(key, value);
         });
         return builder.build();
     }
 
-    public static TraceState createTraceStateFromMembersString(String members) {
-        Map<String, String> membersMap = MEMBER_LIST_PATTERN.splitAsStream(members.trim())
+    public static TraceState createTraceState(String membersList) {
+        Map<String, String> membersMap = MEMBER_LIST_PATTERN.splitAsStream(membersList.trim())
                 .map(s -> s.split("=", 2))
                 .collect(Collectors.toMap(a -> a[0], a -> a.length > 1 ? a[1] : "", (a1, a2) -> a1));
         TraceStateBuilder builder = TraceState.builder();
@@ -136,6 +172,66 @@ public class OtelUtils {
             builder.put(key, value);
         });
         return builder.build();
+    }
+
+    public static SpanContext createSpanContextWithFallback(
+            String traceId,
+            String spanId,
+            String traceFlagsHex,
+            String traceStateMemberList,
+            SpanContext fallback) {
+
+        TraceFlags traceFlags = null;
+        TraceState traceState = null;
+
+        if (fallback == null) {
+            fallback = SpanContext.getInvalid();
+        }
+
+        if (Strings.isEmpty(traceId)) {
+            traceId = fallback.getTraceId();
+            spanId = fallback.getSpanId();
+        }
+        if (!Strings.isEmpty(traceFlagsHex)) {
+            traceFlags = TraceFlags.fromHex(traceFlagsHex, 0);
+        } else {
+            traceFlags = fallback.getTraceFlags();
+        }
+        if (!Strings.isEmpty(traceStateMemberList)) {
+            traceState = createTraceState(traceStateMemberList);
+        } else {
+            traceState = fallback.getTraceState();
+        }
+
+        return SpanContext.create(traceId, spanId, traceFlags, traceState);
+    }
+
+    public static SpanBuilder buildChildSpan(
+            Tracer tracer,
+            String spanName,
+            SpanKind spanKind,
+            String parentTrace,
+            String parentSpan,
+            String parentTraceFlagsHex,
+            String parentTraceStateMemberList,
+            SpanContext fallback,
+            Map<String, String> attributes) {
+
+        SpanContext myParentContext = createSpanContextWithFallback(
+                parentTrace,
+                parentSpan,
+                parentTraceFlagsHex,
+                parentTraceStateMemberList,
+                fallback);
+
+        SpanBuilder spanBuilder = tracer.spanBuilder(spanName)
+                .setParent(Context.current().with(Span.wrap(myParentContext)))
+                .setSpanKind(spanKind);
+        attributes.forEach((key, value) -> {
+            spanBuilder.setAttribute(key, value);
+        });
+
+        return spanBuilder;
     }
 
 }
