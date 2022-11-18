@@ -24,12 +24,16 @@ import org.jboss.pnc.common.concurrent.Sequence;
 import org.jboss.pnc.common.otel.OtelUtils;
 import org.slf4j.MDC;
 
+import io.opentelemetry.api.trace.SpanContext;
+
 import javax.ws.rs.container.ContainerRequestContext;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
@@ -65,6 +69,46 @@ public class MDCUtils {
         copyFromHeaders(mdcContext, MDCHeaderKeys.REQUEST_CONTEXT, headers, () -> Sequence.nextId().toString());
 
         MDC.setContextMap(mdcContext);
+    }
+
+    public static void addMDCFromOtelHeadersWithFallback(
+            ContainerRequestContext requestContext,
+            MDCHeaderKeys traceKey,
+            MDCHeaderKeys spanKey,
+            MDCHeaderKeys traceFlagsKey,
+            MDCHeaderKeys traceStateKey,
+            SpanContext fallbackSpanContext) {
+
+        SpanContext extractedSpanContext = OtelUtils.extractSpanContextFromHeaders(requestContext);
+        if (fallbackSpanContext == null) {
+            fallbackSpanContext = SpanContext.getInvalid();
+        }
+
+        if (extractedSpanContext != null && extractedSpanContext.isValid()) {
+            MDC.put(traceKey.getMdcKey(), extractedSpanContext.getTraceId());
+            MDC.put(spanKey.getMdcKey(), extractedSpanContext.getSpanId());
+            MDC.put(traceFlagsKey.getMdcKey(), extractedSpanContext.getTraceFlags().asHex());
+            MDC.put(
+                    traceStateKey.getMdcKey(),
+                    extractedSpanContext.getTraceState()
+                            .asMap()
+                            .entrySet()
+                            .stream()
+                            .map(Objects::toString)
+                            .collect(Collectors.joining(",")));
+        } else {
+            MDC.put(traceKey.getMdcKey(), fallbackSpanContext.getTraceId());
+            MDC.put(spanKey.getMdcKey(), fallbackSpanContext.getSpanId());
+            MDC.put(traceFlagsKey.getMdcKey(), fallbackSpanContext.getTraceFlags().asHex());
+            MDC.put(
+                    traceStateKey.getMdcKey(),
+                    fallbackSpanContext.getTraceState()
+                            .asMap()
+                            .entrySet()
+                            .stream()
+                            .map(Objects::toString)
+                            .collect(Collectors.joining(",")));
+        }
     }
 
     public static Map<String, String> getHeadersFromMDC() {
