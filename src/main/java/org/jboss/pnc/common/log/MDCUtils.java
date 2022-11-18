@@ -111,6 +111,48 @@ public class MDCUtils {
         }
     }
 
+    public static void addMDCFromOtelHeadersWithFallback(
+            ContainerRequestContext requestContext,
+            SpanContext fallbackSpanContext,
+            boolean slf4jStandard) {
+
+        String mdcTraceKey = slf4jStandard ? MDCKeys.SLF4J_TRACE_ID_KEY : MDCKeys.TRACE_ID_KEY;
+        String mdcSpanKey = slf4jStandard ? MDCKeys.SLF4J_SPAN_ID_KEY : MDCKeys.SPAN_ID_KEY;
+        String mdcTraceFlagsKey = slf4jStandard ? MDCKeys.SLF4J_TRACE_FLAGS_KEY : MDCKeys.TRACE_FLAGS_KEY;
+        String mdcTraceStateKey = slf4jStandard ? MDCKeys.SLF4J_TRACE_STATE_KEY : MDCKeys.TRACE_STATE_KEY;
+
+        SpanContext extractedSpanContext = OtelUtils.extractSpanContextFromHeaders(requestContext);
+        if (fallbackSpanContext == null) {
+            fallbackSpanContext = SpanContext.getInvalid();
+        }
+
+        if (extractedSpanContext != null && extractedSpanContext.isValid()) {
+            MDC.put(mdcTraceKey, extractedSpanContext.getTraceId());
+            MDC.put(mdcSpanKey, extractedSpanContext.getSpanId());
+            MDC.put(mdcTraceFlagsKey, extractedSpanContext.getTraceFlags().asHex());
+            MDC.put(
+                    mdcTraceStateKey,
+                    extractedSpanContext.getTraceState()
+                            .asMap()
+                            .entrySet()
+                            .stream()
+                            .map(Objects::toString)
+                            .collect(Collectors.joining(",")));
+        } else {
+            MDC.put(mdcTraceKey, fallbackSpanContext.getTraceId());
+            MDC.put(mdcSpanKey, fallbackSpanContext.getSpanId());
+            MDC.put(mdcTraceFlagsKey, fallbackSpanContext.getTraceFlags().asHex());
+            MDC.put(
+                    mdcTraceStateKey,
+                    fallbackSpanContext.getTraceState()
+                            .asMap()
+                            .entrySet()
+                            .stream()
+                            .map(Objects::toString)
+                            .collect(Collectors.joining(",")));
+        }
+    }
+
     public static Map<String, String> getHeadersFromMDC() {
         Map<String, String> headers = new HashMap<>();
 
