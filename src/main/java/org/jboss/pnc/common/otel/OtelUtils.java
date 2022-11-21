@@ -54,6 +54,9 @@ public class OtelUtils {
     public static SpanContext extractSpanContextFromHeaders(ContainerRequestContext requestContext) {
 
         SpanContext extractedSpanContext = null;
+        if (requestContext == null) {
+            return extractedSpanContext;
+        }
 
         // Extract the "traceparent" header
         String traceparent = requestContext.getHeaderString(MDCHeaderKeys.TRACEPARENT.getHeaderName());
