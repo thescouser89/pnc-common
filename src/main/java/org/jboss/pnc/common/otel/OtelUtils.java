@@ -17,7 +17,7 @@
  */
 package org.jboss.pnc.common.otel;
 
-import static com.redhat.resilience.otel.internal.OtelContextUtil.extractTraceState;
+import static com.redhat.resilience.otel.internal.OTelContextUtil.extractTraceState;
 
 import java.util.Collections;
 import java.util.Map;
@@ -32,7 +32,7 @@ import org.jboss.pnc.common.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.redhat.resilience.otel.internal.OtelContextUtil;
+import com.redhat.resilience.otel.internal.OTelContextUtil;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
@@ -61,7 +61,7 @@ public class OtelUtils {
         // Extract the "traceparent" header
         String traceparent = requestContext.getHeaderString(MDCHeaderKeys.TRACEPARENT.getHeaderName());
         if (traceparent != null) {
-            extractedSpanContext = OtelContextUtil.extractContextFromTraceParent(traceparent);
+            extractedSpanContext = OTelContextUtil.extractContextFromTraceParent(traceparent);
         }
 
         if (extractedSpanContext == null) {
