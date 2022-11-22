@@ -36,7 +36,7 @@
         <compiler-plugin.version>3.8.1</compiler-plugin.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <version.com.redhat.resilience.otel>1.0.0</version.com.redhat.resilience.otel>
+        <version.com.redhat.resilience.otel>1.1.0</version.com.redhat.resilience.otel>
         <tagSuffix />
     </properties>
 
