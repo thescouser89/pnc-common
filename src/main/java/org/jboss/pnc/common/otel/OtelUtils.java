@@ -55,7 +55,7 @@ public class OtelUtils {
 
         SpanContext extractedSpanContext = null;
         if (requestContext == null) {
-            return extractedSpanContext;
+            return SpanContext.getInvalid();
         }
 
         // Extract the "traceparent" header
