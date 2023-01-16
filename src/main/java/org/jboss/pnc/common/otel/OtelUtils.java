@@ -105,15 +105,31 @@ public class OtelUtils {
         }
     }
 
+    public static String createTraceParent(SpanContext spanContext) {
+        return String.format(
+                "%s-%s-%s-%s",
+                TRACEPARENT_VERSION_00,
+                spanContext.getTraceId(),
+                spanContext.getSpanId(),
+                spanContext.getTraceFlags().asHex());
+    }
+
+    public static String createTraceParent(String traceId, String spanId, String traceFlags) {
+
+        if (Strings.isEmpty(traceId) || Strings.isEmpty(spanId)) {
+            return createTraceParent(SpanContext.getInvalid());
+        }
+
+        return String.format(
+                "%s-%s-%s-%s",
+                TRACEPARENT_VERSION_00,
+                traceId,
+                spanId,
+                Strings.isEmpty(traceFlags) ? TraceFlags.getDefault().asHex() : traceFlags);
+    }
+
     public static Map<String, String> createTraceParentHeader(SpanContext spanContext) {
-        return Collections.singletonMap(
-                MDCHeaderKeys.TRACEPARENT.getHeaderName(),
-                String.format(
-                        "%s-%s-%s-%s",
-                        TRACEPARENT_VERSION_00,
-                        spanContext.getTraceId(),
-                        spanContext.getSpanId(),
-                        spanContext.getTraceFlags().asHex()));
+        return Collections.singletonMap(MDCHeaderKeys.TRACEPARENT.getHeaderName(), createTraceParent(spanContext));
     }
 
     public static Map<String, String> createTraceParentHeader(String traceId, String spanId, String traceFlags) {
@@ -124,9 +140,7 @@ public class OtelUtils {
 
         return Collections.singletonMap(
                 MDCHeaderKeys.TRACEPARENT.getHeaderName(),
-                String.format(
-                        "%s-%s-%s-%s",
-                        TRACEPARENT_VERSION_00,
+                createTraceParent(
                         traceId,
                         spanId,
                         Strings.isEmpty(traceFlags) ? TraceFlags.getDefault().asHex() : traceFlags));
