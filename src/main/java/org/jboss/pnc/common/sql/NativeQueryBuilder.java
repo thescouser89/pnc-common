@@ -28,23 +28,28 @@ public class NativeQueryBuilder {
     }
 
     public NativeQueryBuilder select(String table, String field) {
-        selects.add((table == null || table.isEmpty() ? "" : table + '.') + field);
+        selects.add(table(table) + field);
         return this;
     }
 
     public NativeQueryBuilder select(String table, String field, String alias) {
-        selects.add(
-                (table == null || table.isEmpty() ? "" : table + '.') + field
-                        + (alias == null || alias.isEmpty() ? "" : " AS " + alias));
+        selects.add(table(table) + field + alias(alias));
         return this;
     }
 
     public NativeQueryBuilder requiresSelect(String table, String field, String alias) {
-        String selectClause = (table == null || table.isEmpty() ? "" : table + '.') + field
-                + (alias == null || alias.isEmpty() ? "" : " AS " + alias);
+        String selectClause = table(table) + field + alias(alias);
         if (!selects.contains(selectClause))
             selects.add(selectClause);
         return this;
+    }
+
+    private static String table(String table) {
+        return table == null || table.isEmpty() ? "" : table + '.';
+    }
+
+    private static String alias(String alias) {
+        return alias == null || alias.isEmpty() ? "" : " AS " + alias;
     }
 
     public NativeQueryBuilder from(String table) {
@@ -53,20 +58,21 @@ public class NativeQueryBuilder {
     }
 
     public NativeQueryBuilder from(String table, String alias) {
-        froms.add(table + (alias == null || alias.isEmpty() ? "" : " AS " + alias));
+        froms.add(table + alias(alias));
         return this;
     }
 
     public NativeQueryBuilder join(String joinType, String table, String alias, String onClause) {
-        joins.add(
-                joinType + " JOIN " + table + (alias == null || alias.isEmpty() ? "" : " AS " + alias)
-                        + (onClause == null || onClause.isBlank() ? "" : " ON " + onClause));
+        joins.add(joinType + " JOIN " + table + alias(alias) + on(onClause));
         return this;
     }
 
+    private static String on(String onClause) {
+        return onClause == null || onClause.isBlank() ? "" : " ON " + onClause;
+    }
+
     public NativeQueryBuilder requiresJoin(String joinType, String table, String alias, String onClause) {
-        String joinClause = joinType + " JOIN " + table + (alias == null || alias.isEmpty() ? "" : " AS " + alias)
-                + (onClause == null || onClause.isBlank() ? "" : " ON " + onClause);
+        String joinClause = joinType + " JOIN " + table + alias(alias) + on(onClause);
 
         if (!joins.contains(joinClause))
             joins.add(joinClause);
