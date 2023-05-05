@@ -1,7 +1,9 @@
 package org.jboss.pnc.common.alignment.ranking.tokenizer;
 
 import lombok.EqualsAndHashCode;
+import org.jboss.pnc.api.dto.validation.ValidationResult;
 import org.jboss.pnc.api.enums.Qualifier;
+import org.jboss.pnc.common.alignment.ranking.exception.ValidationException;
 
 @EqualsAndHashCode(callSuper = false) // compare just qualifier and parts
 public class QualifierToken extends Token {
@@ -16,8 +18,9 @@ public class QualifierToken extends Token {
     }
 
     private void assertParts() {
-        if (qualifier.parts != parts.length) {
-            throw new IllegalArgumentException("Illegal amount of input.");
+        ValidationResult validation = qualifier.validate(parts);
+        if (!validation.isValid()) {
+            throw new ValidationException(validation.getValidationError(), this);
         }
     }
 
