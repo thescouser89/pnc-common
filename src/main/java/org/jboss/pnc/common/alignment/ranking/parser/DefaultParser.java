@@ -4,6 +4,7 @@ import org.jboss.pnc.common.alignment.ranking.exception.ValidationException;
 import org.jboss.pnc.common.alignment.ranking.tokenizer.Token;
 import org.jboss.pnc.common.alignment.ranking.tokenizer.TokenType;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,7 +17,7 @@ public class DefaultParser implements Parser {
     /**
      * Tokens which are allowed to be at first place
      */
-    private static final Set<TokenType> START = Set.of(QVALUE, ORDER, LPAREN);
+    private static final Set<TokenType> START = new HashSet<>(EnumSet.of(QVALUE, ORDER, LPAREN));
 
     /**
      * Set of tokens (values) which are allowed to follow a specific Token (key). 'null' signifies that token can be
