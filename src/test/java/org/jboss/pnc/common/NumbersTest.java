@@ -52,8 +52,16 @@ public class NumbersTest {
     }
 
     @Test
+    public void convertDecimalToBase32AndBack2() {
+        String base32 = Numbers.decimalToBase32(219164642586329088l);
+        System.out.println(base32);
+        long backToDecimal = Numbers.base32ToDecimal(base32);
+    }
+
+    @Test
     public void failToConvertBase32Nonsense() {
-        Numbers.base32ToDecimal("AAAAAAAAAAAAA");
+        Long axqidew26SYAA = Numbers.base32ToDecimal("AXQIDEW26SYAA");
+        System.out.println(axqidew26SYAA);
         try {
             Numbers.base32ToDecimal("AAAAAAAAAAAA");
             fail("Should fail when wrong number of digits is used");
