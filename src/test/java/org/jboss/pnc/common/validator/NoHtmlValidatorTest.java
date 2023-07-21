@@ -17,7 +17,14 @@
  */
 package org.jboss.pnc.common.validator;
 
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.junit.jupiter.api.Test;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,5 +42,23 @@ public class NoHtmlValidatorTest {
         // null has no html!
         assertThat(validator.isValid(null, null)).isTrue();
         assertThat(validator.isValid("", null)).isTrue();
+    }
+
+    @Test
+    public void testValidatorAnnotation() {
+        Validator validator = Validation.byDefaultProvider()
+                .configure()
+                .messageInterpolator(new ParameterMessageInterpolator())
+                .buildValidatorFactory()
+                .getValidator();
+
+        NoHtmlDTO dto = new NoHtmlDTO();
+        dto.test = "<div>hello</div>";
+        Set<ConstraintViolation<NoHtmlDTO>> constraintViolations = validator.validate(dto);
+        assertThat(constraintViolations.size()).isEqualTo(1);
+
+        dto.test = "whats up whats going on";
+        constraintViolations = validator.validate(dto);
+        assertThat(constraintViolations.size()).isEqualTo(0);
     }
 }
