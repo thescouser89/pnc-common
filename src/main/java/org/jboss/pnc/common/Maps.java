@@ -1,8 +1,11 @@
 package org.jboss.pnc.common;
 
+import java.util.EnumMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class Maps {
+
     /**
      * Replaces a value at given path in a multidimensional map.
      *
@@ -50,4 +53,19 @@ public class Maps {
         return false;
     }
 
+    /**
+     * Function creates {@code EnumMap} and initializes it with entries ({@code k}, {@code v}), where {@code k} acquires
+     * all enum constants from enum {@code K} and {@code v} is the provided default value.
+     *
+     * @param keyType class of which are all keys in the {@code EnumMap}
+     * @param defaultValue default value for every key
+     * @return {@code EnumMap} as described above
+     * @param <K> type of keys in the resulting {@code EnumMap}
+     * @param <V> type of values in the resulting {@code EnumMap}
+     */
+    public static <K extends Enum<K>, V> EnumMap<K, V> initEnumMapWithDefaultValue(Class<K> keyType, V defaultValue) {
+        EnumMap<K, V> enumMap = new EnumMap<>(keyType);
+        Stream.of(keyType.getEnumConstants()).forEach(enumConst -> enumMap.put(enumConst, defaultValue));
+        return enumMap;
+    }
 }
