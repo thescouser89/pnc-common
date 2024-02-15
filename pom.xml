@@ -108,18 +108,6 @@
             <version>${version.com.redhat.resilience.otel}</version>
         </dependency>
         <dependency>
-            <groupId>org.commonjava.maven.ext</groupId>
-            <artifactId>pom-manipulation-core</artifactId>
-            <version>4.16</version>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.17.2</version>

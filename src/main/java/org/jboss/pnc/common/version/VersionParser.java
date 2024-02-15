@@ -1,6 +1,5 @@
 package org.jboss.pnc.common.version;
 
-import org.commonjava.maven.ext.core.impl.Version;
 import org.jboss.pnc.api.dependencyanalyzer.dto.QualifiedVersion;
 
 import java.util.Arrays;
