@@ -17,7 +17,6 @@ package org.jboss.pnc.common.version;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.commonjava.maven.ext.core.impl.Version;
 import org.jboss.pnc.api.dependencyanalyzer.dto.QualifiedVersion;
 
 import java.util.Objects;
