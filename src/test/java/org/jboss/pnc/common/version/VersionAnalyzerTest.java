@@ -3,7 +3,6 @@ package org.jboss.pnc.common.version;
 import org.jboss.pnc.api.dependencyanalyzer.dto.QualifiedVersion;
 import org.jboss.pnc.api.enums.Qualifier;
 import org.jboss.pnc.common.alignment.ranking.VersionStrategy;
-import org.jboss.pnc.common.version.VersionAnalyzer;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
