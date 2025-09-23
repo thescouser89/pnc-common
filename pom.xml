@@ -10,7 +10,7 @@
 
     <groupId>org.jboss.pnc</groupId>
     <artifactId>pnc-common</artifactId>
-    <version>3.3.1</version>
+    <version>3.3.2-SNAPSHOT</version>
     <name>pnc-common</name>
 
     <licenses>
@@ -24,7 +24,7 @@
         <connection>scm:git:git@github.com:project-ncl/pnc-common.git</connection>
         <url>scm:git:git@github.com:project-ncl/pnc-common.git</url>
         <developerConnection>scm:git:git@github.com:project-ncl/pnc-common.git</developerConnection>
-        <tag>3.3.1</tag>
+        <tag>HEAD</tag>
     </scm>
     <developers>
         <developer>
