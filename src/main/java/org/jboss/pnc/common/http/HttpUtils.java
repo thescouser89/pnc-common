@@ -34,26 +34,24 @@ import java.util.Optional;
 public class HttpUtils {
     private static final ObjectMapper objectMapper = Json.newObjectMapper();
 
-    public static void performHttpPostRequest(String uri, String jsonPayload, String authToken)
+    public static void performHttpPostRequest(String uri, String jsonPayload, String authHttpValue)
             throws JsonProcessingException {
         StringEntity entity = new StringEntity(jsonPayload, "UTF-8");
         entity.setContentType(MediaType.APPLICATION_JSON);
-        performHttpPostRequest(uri, entity, Optional.ofNullable(authToken));
+        performHttpPostRequest(uri, entity, Optional.ofNullable(authHttpValue));
     }
 
-    public static void performHttpPostRequest(String uri, HttpEntity payload, Optional<String> authToken) {
+    public static void performHttpPostRequest(String uri, HttpEntity payload, Optional<String> authHttpValue) {
         log.debug("Sending HTTP POST request to {} with payload {}", uri, payload);
 
         HttpPost request = new HttpPost(uri);
         request.setEntity(payload);
-        if (authToken.isPresent()) {
-            request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + authToken.get());
-        }
+        authHttpValue.ifPresent(s -> request.setHeader(HttpHeaders.AUTHORIZATION, s));
 
         performHttpRequest(URI.create(uri), payload, request);
     }
 
-    public static void performHttpRequest(Request request, Object payload, Optional<String> authToken) {
+    public static void performHttpRequest(Request request, Object payload, Optional<String> authHttpValue) {
         URI uri = request.getUri();
         Request.Method method = request.getMethod();
         log.debug("Sending HTTP {} request to {} with payload {}", method, uri, payload);
@@ -81,7 +79,7 @@ public class HttpUtils {
             }
         }
         request.getHeaders().forEach(h -> httpRequest.setHeader(h.getName(), h.getValue()));
-        authToken.ifPresent(s -> httpRequest.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + s));
+        authHttpValue.ifPresent(s -> httpRequest.setHeader(HttpHeaders.AUTHORIZATION, s));
         performHttpRequest(uri, payload, httpRequest);
     }
 
