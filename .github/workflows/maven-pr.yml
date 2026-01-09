@@ -35,3 +35,10 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+      
+    - name: Check for wrong code formatting
+      run: |
+          if [[ -n $(git status --porcelain) ]]; then
+              echo "Code formatting changes" >> "$GITHUB_OUTPUT";
+              exit 1
+          fi
