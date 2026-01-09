@@ -39,6 +39,8 @@ jobs:
     - name: Check for wrong code formatting
       run: |
           if [[ -n $(git status --porcelain) ]]; then
-              echo "changes=true" >> "$GITHUB_OUTPUT";
+              echo "Code formatting errors"
+              echo "----------------------"
+              git diff
               exit 1
           fi
