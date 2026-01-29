@@ -168,6 +168,44 @@ public class PNCHttpClientTest {
     }
 
     @Test
+    public void sendRequest_withAuthValueSupplier_sendsTokenInHeader() {
+        WireMock.stubFor(WireMock.post(ENDPOINT).willReturn(WireMock.ok()));
+        PNCHttpClient client = new PNCHttpClient(CONFIG);
+        String authValue = "Basic 1234";
+        client.setAuthValueSupplier(() -> authValue);
+
+        client.trySendRequest(createRequest());
+        client.sendRequest(createRequest());
+
+        WireMock.verify(
+                2,
+                WireMock.postRequestedFor(WireMock.urlEqualTo(ENDPOINT))
+                        .withHeader(HEADER_NAME, WireMock.equalTo(HEADER_VALUE))
+                        .withHeader(AUTHORIZATION_STRING, WireMock.equalTo(authValue))
+                        .withRequestBody(WireMock.equalToJson(PAYLOAD_JSON)));
+    }
+
+    @Test
+    public void sendRequest_withTokenSupplier_withAuthValueSupplier_sendsTokenInHeader() {
+        WireMock.stubFor(WireMock.post(ENDPOINT).willReturn(WireMock.ok()));
+        PNCHttpClient client = new PNCHttpClient(CONFIG);
+        String token = "token";
+        // tokenSupplier should win over authValueSupplier
+        client.setTokenSupplier(() -> token);
+        client.setAuthValueSupplier(() -> "hello world");
+
+        client.trySendRequest(createRequest());
+        client.sendRequest(createRequest());
+
+        WireMock.verify(
+                2,
+                WireMock.postRequestedFor(WireMock.urlEqualTo(ENDPOINT))
+                        .withHeader(HEADER_NAME, WireMock.equalTo(HEADER_VALUE))
+                        .withHeader(AUTHORIZATION_STRING, WireMock.equalTo("Bearer " + token))
+                        .withRequestBody(WireMock.equalToJson(PAYLOAD_JSON)));
+    }
+
+    @Test
     public void sendRequest_withPayload_sendsWithPayload() {
         Map<String, Object> payload = Map.of("payload", "new", "isHere", Boolean.TRUE);
         String payloadJson = "{\"payload\":\"new\",\"isHere\":true}";

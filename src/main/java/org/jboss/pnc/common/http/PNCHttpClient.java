@@ -50,10 +50,21 @@ public class PNCHttpClient {
     private final RetryPolicy<HttpResponse<String>> retryPolicy;
     /**
      * Supplier of authentication token to be used with every request. When set, will set the
-     * {@link org.jboss.pnc.api.constants.HttpHeaders#AUTHORIZATION_STRING} header.
+     * {@link org.jboss.pnc.api.constants.HttpHeaders#AUTHORIZATION_STRING} header with scheme "Bearer". It is not
+     * renamed to something more "OIDC" appropriate for historical reason and to be API backwards compatible.
      */
     @Setter
+    @Deprecated
     private Supplier<String> tokenSupplier;
+
+    /**
+     * Supplier of {@link org.jboss.pnc.api.constants.HttpHeaders#AUTHORIZATION_STRING} header value. No scheme is
+     * assumed (Bearer, Basic) and it's up to the supplier to specify it. This supplier is more generic than
+     * tokenSupplier since no scheme is assumed. if tokenSupplier is specified, this takes priority over this.
+     */
+    @Setter
+    private Supplier<String> authValueSupplier;
+
     /**
      * Predicate that is used to decide if retries should be ended early, based on the HTTP status received.
      */
@@ -233,6 +244,8 @@ public class PNCHttpClient {
         request.getHeaders().forEach(h -> builder.header(h.getName(), h.getValue()));
         if (tokenSupplier != null) {
             builder.setHeader(AUTHORIZATION_STRING, "Bearer " + tokenSupplier.get());
+        } else if (authValueSupplier != null) {
+            builder.setHeader(AUTHORIZATION_STRING, authValueSupplier.get());
         }
         return builder.build();
     }
